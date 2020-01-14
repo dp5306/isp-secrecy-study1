@@ -3,7 +3,10 @@ package isp.secrecy;
 import fri.isp.Agent;
 import fri.isp.Environment;
 
+import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
+import javax.crypto.spec.IvParameterSpec;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 
 /**
@@ -27,6 +30,7 @@ public class AgentCommunicationSymmetricCipher {
             @Override
             public void task() throws Exception {
                 final String message = "I love you Bob. Kisses, Alice.";
+
                 /* TODO STEP 3:
                  * Alice creates, encrypts and sends a message
                  *
@@ -34,6 +38,17 @@ public class AgentCommunicationSymmetricCipher {
                  * send the IV. The IV can be accessed via the
                  * cipher.getIV() call
                  */
+
+                System.out.println(message.getBytes().length);
+
+                final Cipher aes = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                aes.init(Cipher.ENCRYPT_MODE, key);
+                final byte[] ct = aes.doFinal(message.getBytes(StandardCharsets.UTF_8));
+                final byte[] iv = aes.getIV();
+                print("sending: '%s' (%s)", message, hex(ct));
+                send("bob", ct);
+                send("bob", iv);
+
             }
         });
 
@@ -50,6 +65,16 @@ public class AgentCommunicationSymmetricCipher {
                  *
                  * You then pass this object to the cipher init() method call.*
                  */
+
+                final byte[] ct = receive("alice");
+                final byte[] iv = receive("alice");
+
+                final Cipher aes = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                aes.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
+                final byte[] pt = aes.doFinal(ct);
+                final String message = new String(pt, StandardCharsets.UTF_8);
+
+                print("got: '%s' (%s)", message, hex(ct));
             }
         });
 

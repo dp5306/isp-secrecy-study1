@@ -53,13 +53,19 @@ public class SymmetricCipherExample {
          * possibly additional parameters (such as IV), and then decrypts the cipher text
          */
         final Cipher decryption = Cipher.getInstance("RC4");
+        Key key2 = KeyGenerator.getInstance("RC4").generateKey();
         decryption.init(Cipher.DECRYPT_MODE, key);
         final byte[] decryptedText = decryption.doFinal(cipherText);
         System.out.println("[PT] " + Agent.hex(decryptedText));
+
+        decryption.init(Cipher.DECRYPT_MODE, key2);
+        final byte[] decryptedText2 = decryption.doFinal(cipherText);
+        System.out.println("[PT2] " + Agent.hex(decryptedText2));
 
         // Todo: What happens if the key is incorrect? (Try with RC4 or AES in CTR mode)
 
         // STEP 5: Create a string from a byte array
         System.out.println("[MESSAGE] " + new String(decryptedText));
+        System.out.println("[MESSAGE2] " + new String(decryptedText2));
     }
 }
